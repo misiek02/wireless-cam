@@ -52,7 +52,6 @@ async def process_track(track):
             
             # Send frame to virtual camera
             virtual_cam.send(img)
-            virtual_cam.sleep_until_next_frame()
             
     except Exception as e:
         logger.info(f"Track ended: {e}")

@@ -193,6 +193,11 @@ async function startWebRTC() {
     });
 
     const offer = await pc.createOffer();
+    
+    // Force maximum bandwidth (15Mbps) instead of typical low WebRTC limits
+    offer.sdp = offer.sdp.replace(/b=AS:.*\r\n/g, "");
+    offer.sdp = offer.sdp.replace(/a=mid:video\r\n/g, "a=mid:video\r\nb=AS:15000\r\n");
+
     await pc.setLocalDescription(offer);
 
     try {
@@ -207,6 +212,20 @@ async function startWebRTC() {
 
         const answer = await response.json();
         await pc.setRemoteDescription(answer);
+
+        // Modify sender parameters to prevent dynamic down-scaling
+        const senders = pc.getSenders();
+        const sender = senders.find(s => s.track && s.track.kind === 'video');
+        if (sender && sender.getParameters) {
+            const params = sender.getParameters();
+            if (!params.encodings) params.encodings = [{}];
+            params.encodings.forEach(enc => {
+                enc.maxBitrate = 15000000; // 15 Mbps
+                // Optional: You can enforce no scale down
+                // enc.scaleResolutionDownBy = 1;
+            });
+            await sender.setParameters(params);
+        }
     } catch (err) {
         console.error("Connection failed", err);
         stopStream();
