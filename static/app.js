@@ -16,7 +16,7 @@ const translations = {
         err_no_cam: "Camera access denied or no cameras found.",
         cam_front: "Front",
         cam_back: "Back",
-        btn_light: "💡 Screen Light",
+        btn_light: "💡 Screen Light"
     },
     pl: {
         app_title: "Bezprzewodowa Kamera",
@@ -34,7 +34,7 @@ const translations = {
         err_no_cam: "Odmowa dostępu do kamery lub brak kamer.",
         cam_front: "Przód",
         cam_back: "Tył",
-        btn_light: "💡 Doświetlenie Twarzy",
+        btn_light: "💡 Doświetlenie Twarzy"
     }
 };
 
@@ -54,7 +54,6 @@ function setLanguage(lang) {
     
     document.title = translations[currentLang].app_title;
 
-    // Update dynamic texts
     if (isStreaming) {
         document.querySelector('#start-btn span').textContent = translations[lang].btn_stop;
         statusText.textContent = translations[lang].status_connected;
@@ -63,9 +62,7 @@ function setLanguage(lang) {
         statusText.textContent = translations[lang].status_disconnected;
     }
 
-    // Refresh option labels if already loaded
     if (cameraSelect.options.length > 0 && cameraSelect.options[0].value !== "") {
-        // A hacky quick way: Re-enumerate labels to ensure translation of front/back
         Array.from(cameraSelect.options).forEach(opt => {
             if (opt.text.toLowerCase().includes('front') || opt.text.toLowerCase().includes('przód')) {
                 opt.text = opt.text.replace(/ \(.*\)/, '') + ` (${translations[lang].cam_front})`;
@@ -79,9 +76,8 @@ function setLanguage(lang) {
 document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
 document.getElementById('lang-pl').addEventListener('click', () => setLanguage('pl'));
 
-
-// --- WebRTC Logic ---
-let pc = null;
+// --- Stream & Socket Logic ---
+let ws = null;
 let currentStream = null;
 let isStreaming = false;
 
@@ -93,9 +89,11 @@ const startBtnText = startBtn.querySelector('span');
 const statusBadge = document.getElementById('status-badge');
 const statusText = document.getElementById('status-text');
 
+let canvas = document.createElement('canvas');
+let ctx = canvas.getContext('2d', { willReadFrequently: true });
+
 async function getCameras() {
     try {
-        // Request initial permission to enumerate properly
         const dummyStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
         dummyStream.getTracks().forEach(track => track.stop());
 
@@ -114,7 +112,6 @@ async function getCameras() {
             option.value = device.deviceId;
             let label = device.label || `Camera ${cameraSelect.length + 1}`;
             
-            // Try to append Front/Back label safely
             if (label.toLowerCase().includes('front')) label += ` (${translations[currentLang].cam_front})`;
             else if (label.toLowerCase().includes('back')) label += ` (${translations[currentLang].cam_back})`;
             
@@ -125,7 +122,6 @@ async function getCameras() {
         cameraSelect.disabled = false;
         startBtn.disabled = false;
         
-        // Auto preview first camera (or whatever is selected)
         startPreview();
     } catch (err) {
         console.error('Error accessing media devices.', err);
@@ -152,7 +148,6 @@ async function startPreview() {
         videoConstraints.width = { ideal: 1280 };
         videoConstraints.height = { ideal: 720 };
     } else {
-        // Max res usually fallback to hardware limit
         videoConstraints.width = { ideal: 4096 };
         videoConstraints.height = { ideal: 2160 };
     }
@@ -160,16 +155,6 @@ async function startPreview() {
     try {
         currentStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
         videoEl.srcObject = currentStream;
-        
-        // If we switched while streaming, update WebRTC sender
-        if (isStreaming && pc) {
-            const videoTrack = currentStream.getVideoTracks()[0];
-            const senders = pc.getSenders();
-            const sender = senders.find(s => s.track && s.track.kind === 'video');
-            if (sender) {
-                sender.replaceTrack(videoTrack);
-            }
-        }
     } catch (err) {
         console.error('Error starting preview.', err);
     }
@@ -178,73 +163,33 @@ async function startPreview() {
 cameraSelect.addEventListener('change', startPreview);
 resSelect.addEventListener('change', startPreview);
 
-async function startWebRTC() {
-    pc = new RTCPeerConnection();
-
-    currentStream.getTracks().forEach(track => {
-        pc.addTrack(track, currentStream);
-    });
-
-    pc.addEventListener('connectionstatechange', () => {
-        if (pc.connectionState === 'connected') {
-            statusBadge.className = 'status-badge connected';
-            statusText.textContent = translations[currentLang].status_connected;
-        } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-            stopStream();
-        }
-    });
-
-    const offer = await pc.createOffer();
-    
-    // Force maximum bandwidth (15Mbps) instead of typical low WebRTC limits
-    offer.sdp = offer.sdp.replace(/b=AS:.*\r\n/g, "");
-    offer.sdp = offer.sdp.replace(/a=mid:video\r\n/g, "a=mid:video\r\nb=AS:15000\r\n");
-
-    await pc.setLocalDescription(offer);
-
-    try {
-        const response = await fetch('/offer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sdp: pc.localDescription.sdp,
-                type: pc.localDescription.type
-            })
-        });
-
-        const answer = await response.json();
-        await pc.setRemoteDescription(answer);
-
-        // Modify sender parameters to prevent dynamic down-scaling
-        const senders = pc.getSenders();
-        const sender = senders.find(s => s.track && s.track.kind === 'video');
-        if (sender && sender.getParameters) {
-            const params = sender.getParameters();
-            if (!params.encodings) params.encodings = [{}];
-            params.encodings.forEach(enc => {
-                enc.maxBitrate = 15000000; // 15 Mbps
-                // Optional: You can enforce no scale down
-                // enc.scaleResolutionDownBy = 1;
-            });
-            await sender.setParameters(params);
-        }
-    } catch (err) {
-        console.error("Connection failed", err);
-        stopStream();
-    }
+function getBlob() {
+    // 95% quality JPEG. Lossless clarity transferred over Websockets. No blur.
+    return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95)); 
 }
 
-function stopStream() {
-    isStreaming = false;
-    startBtn.className = 'primary-btn pulse';
-    startBtnText.textContent = translations[currentLang].btn_start;
-    
-    statusBadge.className = 'status-badge';
-    statusText.textContent = translations[currentLang].status_disconnected;
-
-    if (pc) {
-        pc.close();
-        pc = null;
+async function sendFramesLoop() {
+    while (isStreaming && ws && ws.readyState === WebSocket.OPEN) {
+        const start = performance.now();
+        
+        if (videoEl.videoWidth > 0) {
+            if (canvas.width !== videoEl.videoWidth || canvas.height !== videoEl.videoHeight) {
+                canvas.width = videoEl.videoWidth;
+                canvas.height = videoEl.videoHeight;
+            }
+            ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+            const blob = await getBlob();
+            
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(blob);
+            }
+        }
+        
+        const elapsed = performance.now() - start;
+        const targetInterval = 1000 / 30; // target 30 fps
+        const delay = Math.max(0, targetInterval - elapsed);
+        
+        await new Promise(r => setTimeout(r, delay));
     }
 }
 
@@ -258,7 +203,32 @@ async function toggleStream() {
         startBtnText.textContent = translations[currentLang].btn_stop;
         statusText.textContent = "Connecting...";
         
-        await startWebRTC();
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+        
+        ws.onopen = () => {
+            statusBadge.className = 'status-badge connected';
+            statusText.textContent = translations[currentLang].status_connected;
+            sendFramesLoop();
+        };
+        
+        ws.onclose = () => {
+            stopStream();
+        };
+    }
+}
+
+function stopStream() {
+    isStreaming = false;
+    startBtn.className = 'primary-btn pulse';
+    startBtnText.textContent = translations[currentLang].btn_start;
+    
+    statusBadge.className = 'status-badge';
+    statusText.textContent = translations[currentLang].status_disconnected;
+
+    if (ws) {
+        ws.close();
+        ws = null;
     }
 }
 
@@ -271,7 +241,7 @@ let wakeLock = null;
 
 async function toggleLight() {
     isLightOn = !isLightOn;
-    document.body.classList.toggle('screen-light-active', isLightOn);
+    document.getElementById('screen-light-overlay').style.display = isLightOn ? 'flex' : 'none';
     
     if (isLightOn) {
         try {
