@@ -50,17 +50,33 @@ video {
     z-index: 10;
 }
 
-/* LIQUID GLASS NEUMORPHISM */
+/* LIQUID GLASS NEUMORPHISM (kube.io inspired) */
 .status-badge, .pill-btn, .icon-btn {
-    background: rgba(255, 255, 255, 0.05); /* very subtle white */
-    backdrop-filter: blur(40px) saturate(200%); /* extreme blur */
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(40px) saturate(200%);
     -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.2); /* sharp top edge */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 
-        inset 0 1px 0px rgba(255, 255, 255, 0.3), /* inner top light */
-        inset 0 -1px 0px rgba(0, 0, 0, 0.2); /* inner bottom dark */
+        inset 0 2px 3px rgba(255, 255, 255, 0.4), 
+        inset 0 -2px 3px rgba(0, 0, 0, 0.2), 
+        0 8px 24px rgba(0,0,0,0.3);
     color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Specular Highlight glare simulating 3D bevel refraction */
+.pill-btn::before, .icon-btn::before, .status-badge::before {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 5%;
+    width: 90%;
+    height: 40%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0));
+    border-radius: 30px 30px 0 0;
+    pointer-events: none;
 }
 
 .status-badge {
@@ -97,6 +113,7 @@ video {
 
 .camera-pills {
     display: flex;
+    justify-content: center;
     gap: 12px;
     overflow-x: auto;
     padding-bottom: 5px;
@@ -108,8 +125,8 @@ video {
 }
 
 .pill-btn {
-    padding: 10px 20px;
-    border-radius: 24px;
+    padding: 12px 24px;
+    border-radius: 30px;
     font-size: 0.95rem;
     font-weight: 600;
     white-space: nowrap;
@@ -118,10 +135,14 @@ video {
 }
 
 .pill-btn.active {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.5);
-    color: #fff;
-    box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.6);
+    color: #000;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.pill-btn.active::before {
+    display: none;
 }
 
 .action-row {
@@ -158,35 +179,56 @@ video {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: 2px solid rgba(255, 255, 255, 0.6);
+    background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 100%);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: 0.3s;
     cursor: pointer;
-    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4);
+    box-shadow: 
+        inset 0 4px 6px rgba(255, 255, 255, 0.5),
+        inset 0 -4px 6px rgba(0, 0, 0, 0.3),
+        0 10px 20px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.main-record-btn::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 10%;
+    width: 80%;
+    height: 35%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0));
+    border-radius: 50px 50px 0 0;
+    pointer-events: none;
 }
 
 .record-inner {
-    width: 60px;
-    height: 60px;
-    background: #fff;
+    width: 54px;
+    height: 54px;
+    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%;
     transition: 0.3s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
 .main-record-btn.streaming {
     border-color: var(--danger);
-    border-top-color: var(--danger);
+    box-shadow: 
+        inset 0 4px 6px rgba(255, 59, 59, 0.5),
+        inset 0 -4px 6px rgba(0, 0, 0, 0.3),
+        0 10px 20px rgba(255, 59, 59, 0.4);
 }
 
 .main-record-btn.streaming .record-inner {
-    background: var(--danger);
+    background: radial-gradient(circle at 30% 30%, var(--danger), #c0392b);
     border-radius: 12px;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
 }
