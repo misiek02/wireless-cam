@@ -1,6 +1,6 @@
 const translations = {
-    en: { ready: "Ready", streaming: "Streaming", lang: "PL", l_temp: "Color Temp (Kelvin)", l_bright: "Color Brightness", l_close: "Turn Off Light" },
-    pl: { ready: "Gotowe", streaming: "Kamera Włączona", lang: "EN", l_temp: "Barwa Światła (Zimna-Ciepła)", l_bright: "Jasność Szarości", l_close: "Wyłącz Lampę" }
+    en: { ready: "Ready", streaming: "Streaming", lang: "PL" },
+    pl: { ready: "Gotowe", streaming: "Kamera Włączona", lang: "EN" }
 };
 let currentLang = 'en';
 
@@ -29,49 +29,6 @@ function toggleLang() {
 function updateUI() {
     langBtn.textContent = translations[currentLang].lang;
     statusText.textContent = isStreaming ? translations[currentLang].streaming : translations[currentLang].ready;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (translations[currentLang][key]) el.textContent = translations[currentLang][key];
-    });
-}
-
-function colorTemperatureToRGB(kelvin) {
-    let temp = kelvin / 100;
-    let red, green, blue;
-    if (temp <= 66) {
-        red = 255;
-        green = temp;
-        green = 99.4708025861 * Math.log(green) - 161.1195681661;
-        if (temp <= 19) blue = 0;
-        else {
-            blue = temp - 10;
-            blue = 138.5177312231 * Math.log(blue) - 305.0447927307;
-        }
-    } else {
-        red = temp - 60;
-        red = 329.698727446 * Math.pow(red, -0.1332047592);
-        green = temp - 60;
-        green = 288.1221695283 * Math.pow(green, -0.0755148492);
-        blue = 255;
-    }
-    return {
-        r: Math.max(0, Math.min(255, red)),
-        g: Math.max(0, Math.min(255, green)),
-        b: Math.max(0, Math.min(255, blue))
-    };
-}
-
-function updateLight() {
-    const bValue = parseInt(document.getElementById('light-brightness').value) / 100;
-    const tValue = parseInt(document.getElementById('light-temp').value);
-    
-    const rgb = colorTemperatureToRGB(tValue);
-    const r = Math.round(rgb.r * bValue);
-    const g = Math.round(rgb.g * bValue);
-    const b = Math.round(rgb.b * bValue);
-    
-    const overlay = document.getElementById('screen-light-overlay');
-    overlay.style.setProperty('background-color', `rgb(${r}, ${g}, ${b})`, 'important');
 }
 
 async function getCameras() {
@@ -84,19 +41,18 @@ async function getCameras() {
 
         cameraPills.innerHTML = '';
         
-        let hasFront = false;
+        let frontCount = 1;
         let backCount = 1;
 
         videoDevices.forEach((device) => {
             const isFront = device.label.toLowerCase().includes('front') || device.label.toLowerCase().includes('przód');
-            if (isFront && hasFront) return; // Only 1 front camera button
-            if (isFront) hasFront = true;
 
             const btn = document.createElement('div');
             btn.className = 'pill-btn';
             
             if (isFront) {
-                btn.textContent = currentLang === 'pl' ? "📷 Przód" : "📷 Front";
+                btn.textContent = currentLang === 'pl' ? `📷 Przód ${frontCount}` : `📷 Front ${frontCount}`;
+                frontCount++;
             } else {
                 btn.textContent = currentLang === 'pl' ? `📷 Tył ${backCount}` : `📷 Back ${backCount}`;
                 backCount++;
@@ -112,12 +68,24 @@ async function getCameras() {
             };
             cameraPills.appendChild(btn);
             
-            if (!activeDeviceId && (!isFront || videoDevices.length === 1)) {
+            if (!activeDeviceId && backCount === 2 && !isFront) {
+                // Auto-select first back camera if possible
+                btn.classList.add('active');
+                activeDeviceBtn = btn;
+                startPreview(device.deviceId);
+            } else if (!activeDeviceId && videoDevices.length === 1) {
                 btn.classList.add('active');
                 activeDeviceBtn = btn;
                 startPreview(device.deviceId);
             }
         });
+        
+        // Fallback auto-start if nothing selected
+        if (!activeDeviceId && videoDevices.length > 0) {
+            cameraPills.children[0].classList.add('active');
+            activeDeviceBtn = cameraPills.children[0];
+            startPreview(videoDevices[0].deviceId);
+        }
         
     } catch (err) {
         console.error(err);
@@ -189,23 +157,6 @@ async function toggleStream() {
             sendFramesLoop();
         };
         ws.onclose = () => { if (isStreaming) toggleStream(); };
-    }
-}
-
-let isLightOn = false;
-let wakeLock = null;
-
-async function toggleLight() {
-    isLightOn = !isLightOn;
-    document.getElementById('screen-light-overlay').style.display = isLightOn ? 'flex' : 'none';
-    
-    if (isLightOn) {
-        updateLight(); // Set initial color
-        try {
-            if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
-        } catch (err) {}
-    } else {
-        if (wakeLock) { wakeLock.release(); wakeLock = null; }
     }
 }
 

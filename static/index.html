@@ -27,28 +27,13 @@
                 <div class="camera-pills" id="camera-pills"></div>
                 
                 <div class="action-row">
-                    <button id="light-btn" class="icon-btn" onclick="toggleLight()">💡</button>
                     <button id="start-btn" class="main-record-btn" onclick="toggleStream()">
                         <div class="record-inner"></div>
                     </button>
-                    <div style="width: 50px;"></div>
                 </div>
             </div>
         </div>
     </main>
-    
-    <!-- PURE WHITE FACE LIGHT CONTROLS -->
-    <div id="screen-light-overlay">
-        <div class="light-control-panel" onclick="event.stopPropagation()">
-            <label><span data-i18n="l_bright">Screen Brightness</span></label>
-            <input type="range" id="light-brightness" min="10" max="100" value="100" oninput="updateLight()">
-            
-            <label><span data-i18n="l_temp">Color Temperature</span></label>
-            <input type="range" id="light-temp" min="2000" max="8000" value="5500" oninput="updateLight()">
-            
-            <button class="close-light-btn" onclick="toggleLight()"><span data-i18n="l_close">Turn Off</span></button>
-        </div>
-    </div>
 
     <script src="/static/app.js"></script>
 </body>
