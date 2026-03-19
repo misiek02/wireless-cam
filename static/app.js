@@ -1,15 +1,8 @@
-const translations = {
-    en: { ready: "Ready", streaming: "Streaming", lang: "PL" },
-    pl: { ready: "Gotowe", streaming: "Kamera Włączona", lang: "EN" }
-};
-let currentLang = 'en';
-
 const videoEl = document.getElementById('preview');
 const statusBadge = document.getElementById('status-badge');
 const statusText = document.getElementById('status-text');
 const startBtn = document.getElementById('start-btn');
 const cameraPills = document.getElementById('camera-pills');
-const langBtn = document.getElementById('lang-btn');
 
 let ws = null;
 let currentStream = null;
@@ -20,15 +13,8 @@ let activeDeviceBtn = null;
 let canvas = document.createElement('canvas');
 let ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-function toggleLang() {
-    currentLang = currentLang === 'en' ? 'pl' : 'en';
-    updateUI();
-    getCameras();
-}
-
 function updateUI() {
-    langBtn.textContent = translations[currentLang].lang;
-    statusText.textContent = isStreaming ? translations[currentLang].streaming : translations[currentLang].ready;
+    statusText.textContent = isStreaming ? "Streaming" : "Ready";
 }
 
 async function getCameras() {
@@ -54,9 +40,9 @@ async function getCameras() {
             btn.className = 'pill-btn';
             
             if (isFront) {
-                btn.textContent = currentLang === 'pl' ? `Przód 1` : `Front 1`;
+                btn.textContent = `Front 1`;
             } else {
-                btn.textContent = currentLang === 'pl' ? `Tył ${backCount}` : `Back ${backCount}`;
+                btn.textContent = `Back ${backCount}`;
                 backCount++;
             }
 
