@@ -9,9 +9,17 @@ let currentStream = null;
 let isStreaming = false;
 let activeDeviceId = null;
 let activeDeviceBtn = null;
+let isCropMode = false;
 
 let canvas = document.createElement('canvas');
 let ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+function toggleCrop() {
+    isCropMode = !isCropMode;
+    const btn = document.getElementById('crop-btn');
+    if (isCropMode) btn.classList.add('active');
+    else btn.classList.remove('active');
+}
 
 function updateUI() {
     statusText.textContent = isStreaming ? "Streaming" : "Ready";
@@ -107,7 +115,10 @@ async function sendFramesLoop() {
             
             const vw = videoEl.videoWidth;
             const vh = videoEl.videoHeight;
-            const scale = Math.min(canvas.width / vw, canvas.height / vh);
+            
+            // "Fill" mode if horizontally cropping portrait, otherwise "Fit" mode for letterbox
+            const scale = isCropMode ? Math.max(canvas.width / vw, canvas.height / vh) : Math.min(canvas.width / vw, canvas.height / vh);
+            
             const drawW = vw * scale;
             const drawH = vh * scale;
             const offsetX = (canvas.width - drawW) / 2;
