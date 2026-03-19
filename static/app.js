@@ -17,8 +17,14 @@ let ctx = canvas.getContext('2d', { willReadFrequently: true });
 function toggleCrop() {
     isCropMode = !isCropMode;
     const btn = document.getElementById('crop-btn');
-    if (isCropMode) btn.classList.add('active');
-    else btn.classList.remove('active');
+    const guide = document.getElementById('crop-guide');
+    if (isCropMode) {
+        btn.classList.add('active');
+        guide.classList.add('visible');
+    } else {
+        btn.classList.remove('active');
+        guide.classList.remove('visible');
+    }
 }
 
 function updateUI() {

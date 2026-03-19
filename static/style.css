@@ -52,7 +52,7 @@ video {
 
 /* LIQUID GLASS NEUMORPHISM (kube.io inspired) */
 .status-badge, .pill-btn, .icon-btn {
-    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.01) 100%);
     backdrop-filter: blur(40px) saturate(200%);
     -webkit-backdrop-filter: blur(40px) saturate(200%);
     border: 1px solid rgba(255, 255, 255, 0.4);
@@ -177,7 +177,7 @@ video {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 100%);
     backdrop-filter: blur(30px) saturate(200%);
     -webkit-backdrop-filter: blur(30px) saturate(200%);
     border: 1px solid rgba(255, 255, 255, 0.5);
@@ -224,4 +224,24 @@ video {
     border-radius: 12px;
     width: 30px;
     height: 30px;
+}
+
+/* KADROWANIE (CROP GUIDE VIEWFINDER) */
+.crop-guide {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    aspect-ratio: 16/9;
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    z-index: 5;
+    transition: opacity 0.3s;
+    opacity: 0;
+}
+.crop-guide.visible {
+    opacity: 1;
 }
