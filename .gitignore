@@ -12,3 +12,8 @@ __pycache__/
 # IDE
 .vscode/
 .idea/
+
+# PyInstaller
+build/
+dist/
+*.spec
