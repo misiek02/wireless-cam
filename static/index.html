@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- FORBID ZERO/DARK SCHEMES SO SCREEN LIGHT CAN BE TRULY WHITE -->
+    <!-- FORBID DARK SCHEME INVERSION -->
     <meta name="color-scheme" content="light only">
     <title>Wireless Camera</title>
     <link rel="stylesheet" href="/static/style.css">
@@ -11,11 +11,10 @@
 </head>
 <body>
     <main class="app-container">
-        <!-- Live Preview Full Screen -->
+        <!-- Live Preview -->
         <div class="video-container">
             <video id="preview" autoplay playsinline muted></video>
             
-            <!-- Top Status Indicator -->
             <div class="top-bar">
                 <div class="status-badge" id="status-badge">
                     <span class="dot"></span>
@@ -24,28 +23,31 @@
                 <button id="lang-btn" class="icon-btn tiny" onclick="toggleLang()">PL</button>
             </div>
             
-            <!-- Bottom Controls Overlay -->
             <div class="bottom-controls">
-                <div class="camera-pills" id="camera-pills">
-                    <!-- Dynamic Camera Buttons -->
-                </div>
+                <div class="camera-pills" id="camera-pills"></div>
                 
                 <div class="action-row">
-                    <button id="light-btn" class="icon-btn" onclick="toggleLight()">
-                        💡
-                    </button>
+                    <button id="light-btn" class="icon-btn" onclick="toggleLight()">💡</button>
                     <button id="start-btn" class="main-record-btn" onclick="toggleStream()">
                         <div class="record-inner"></div>
                     </button>
-                    <div style="width: 50px;"></div> <!-- Spacer to center record button -->
+                    <div style="width: 50px;"></div>
                 </div>
             </div>
         </div>
     </main>
     
-    <!-- PURE WHITE FACE LIGHT OVERLAY -->
-    <div id="screen-light-overlay" onclick="toggleLight()">
-        <span id="light-text">Tap to close 💡 (Set MAX brightness)</span>
+    <!-- PURE WHITE FACE LIGHT CONTROLS -->
+    <div id="screen-light-overlay">
+        <div class="light-control-panel" onclick="event.stopPropagation()">
+            <label><span data-i18n="l_bright">Screen Brightness</span></label>
+            <input type="range" id="light-brightness" min="10" max="100" value="100" oninput="updateLight()">
+            
+            <label><span data-i18n="l_temp">Color Temperature</span></label>
+            <input type="range" id="light-temp" min="2000" max="8000" value="5500" oninput="updateLight()">
+            
+            <button class="close-light-btn" onclick="toggleLight()"><span data-i18n="l_close">Turn Off</span></button>
+        </div>
     </div>
 
     <script src="/static/app.js"></script>
