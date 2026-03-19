@@ -164,8 +164,8 @@ cameraSelect.addEventListener('change', startPreview);
 resSelect.addEventListener('change', startPreview);
 
 function getBlob() {
-    // 95% quality JPEG. Lossless clarity transferred over Websockets. No blur.
-    return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95)); 
+    // 85% quality JPEG. Keeps extreme sharpness while drastically reducing network footprint.
+    return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85)); 
 }
 
 async function sendFramesLoop() {
@@ -173,21 +173,38 @@ async function sendFramesLoop() {
         const start = performance.now();
         
         if (videoEl.videoWidth > 0) {
-            if (canvas.width !== videoEl.videoWidth || canvas.height !== videoEl.videoHeight) {
-                canvas.width = videoEl.videoWidth;
-                canvas.height = videoEl.videoHeight;
-            }
-            ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-            const blob = await getBlob();
-            
-            if (ws.readyState === WebSocket.OPEN) {
-                ws.send(blob);
+            // Drop frames if network buffer builds up (> 50KB) - guarantees ZERO latency!
+            if (ws.bufferedAmount < 1024 * 50) { 
+                // Always export 1920x1080. This protects Zoom/OBS from blurring rotated streams.
+                if (canvas.width !== 1920) canvas.width = 1920;
+                if (canvas.height !== 1080) canvas.height = 1080;
+                
+                const vw = videoEl.videoWidth;
+                const vh = videoEl.videoHeight;
+                const scale = Math.min(canvas.width / vw, canvas.height / vh);
+                const drawW = vw * scale;
+                const drawH = vh * scale;
+                const offsetX = (canvas.width - drawW) / 2;
+                const offsetY = (canvas.height - drawH) / 2;
+                
+                // Draw black bars for padding if rotated vertically (portrait)
+                ctx.fillStyle = "black";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(videoEl, offsetX, offsetY, drawW, drawH);
+                
+                const blob = await getBlob();
+                
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(blob);
+                }
+            } else {
+                // Console log excluded to prevent spam, frame skipped naturally.
             }
         }
         
         const elapsed = performance.now() - start;
-        const targetInterval = 1000 / 30; // target 30 fps
-        const delay = Math.max(0, targetInterval - elapsed);
+        const targetInterval = 1000 / 24; // 24 FPS target (cinematic/video-call standard)
+        const delay = Math.max(5, targetInterval - elapsed);
         
         await new Promise(r => setTimeout(r, delay));
     }

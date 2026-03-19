@@ -1,14 +1,14 @@
 :root {
-    --bg-gradient-1: #1a0b2e;
-    --bg-gradient-2: #3b185f;
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --text-main: #ffffff;
-    --text-muted: #a09eb5;
-    --accent: #ff2e93;
-    --accent-hover: #ff5eaa;
-    --danger: #ff4757;
-    --success: #2ed573;
+    --bg-gradient-1: #1a1a1d;
+    --bg-gradient-2: #2c3e50;
+    --glass-bg: rgba(20, 20, 25, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.05);
+    --text-main: #f0f0f0;
+    --text-muted: #888899;
+    --accent: #2980b9;
+    --accent-hover: #3498db;
+    --danger: #e74c3c;
+    --success: #2ecc71;
 }
 
 * {
@@ -86,9 +86,7 @@ h1 {
     font-size: 2.2rem;
     font-weight: 800;
     margin-bottom: 8px;
-    background: linear-gradient(to right, #fff, #ff2e93);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #ffffff;
 }
 
 .subtitle {
