@@ -41,18 +41,20 @@ async function getCameras() {
 
         cameraPills.innerHTML = '';
         
+        let hasFront = false;
         let frontCount = 1;
         let backCount = 1;
 
         videoDevices.forEach((device) => {
             const isFront = device.label.toLowerCase().includes('front') || device.label.toLowerCase().includes('przód');
+            if (isFront && hasFront) return; // Only take 1 front camera
+            if (isFront) hasFront = true;
 
             const btn = document.createElement('div');
             btn.className = 'pill-btn';
             
             if (isFront) {
-                btn.textContent = currentLang === 'pl' ? `📷 Przód ${frontCount}` : `📷 Front ${frontCount}`;
-                frontCount++;
+                btn.textContent = currentLang === 'pl' ? `📷 Przód 1` : `📷 Front 1`;
             } else {
                 btn.textContent = currentLang === 'pl' ? `📷 Tył ${backCount}` : `📷 Back ${backCount}`;
                 backCount++;

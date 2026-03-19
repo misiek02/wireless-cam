@@ -51,14 +51,17 @@ video {
 }
 
 /* LIQUID GLASS NEUMORPHISM */
-.status-badge, .icon-btn, .pill-btn, .light-control-panel {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+.status-badge, .pill-btn {
+    background: rgba(255, 255, 255, 0.05); /* very subtle white */
+    backdrop-filter: blur(40px) saturate(200%); /* extreme blur */
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.2); /* sharp top edge */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 
-        inset 0 1px 1px rgba(255, 255, 255, 0.4), 
-        0 8px 32px rgba(0, 0, 0, 0.3);
+        inset 0 1px 0px rgba(255, 255, 255, 0.3), /* inner top light */
+        inset 0 -1px 0px rgba(0, 0, 0, 0.2), /* inner bottom dark */
+        0 10px 30px rgba(0, 0, 0, 0.5); /* deep shadow */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5); /* text depth */
     color: #fff;
 }
 
@@ -88,7 +91,7 @@ video {
     position: absolute;
     bottom: 0; left: 0; right: 0;
     padding: 20px 20px 40px 20px;
-    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+    background: transparent;
     display: flex;
     flex-direction: column;
     gap: 25px;
@@ -117,15 +120,17 @@ video {
 }
 
 .pill-btn.active {
-    background: rgba(255, 255, 255, 0.9);
-    color: #000;
-    box-shadow: 0 0 20px rgba(255,255,255,0.4);
-    border-color: #fff;
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+    box-shadow: 
+        inset 0 1px 0px rgba(255, 255, 255, 0.6),
+        0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 .action-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding: 0 10px;
 }
@@ -154,16 +159,22 @@ video {
 }
 
 .main-record-btn {
-    width: 76px;
-    height: 76px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    background: transparent;
-    border: 4px solid #fff;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid rgba(255, 255, 255, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: 0.3s;
     cursor: pointer;
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.4),
+        0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .record-inner {
@@ -176,6 +187,7 @@ video {
 
 .main-record-btn.streaming {
     border-color: var(--danger);
+    border-top-color: var(--danger);
 }
 
 .main-record-btn.streaming .record-inner {
