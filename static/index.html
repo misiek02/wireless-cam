@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="app_title">Wireless Virtual Camera</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="lang-switcher">
+        <button id="lang-en" class="active">EN</button>
+        <button id="lang-pl">PL</button>
+    </div>
+
+    <div class="glass-container">
+        <header>
+            <h1 data-i18n="app_header">Wireless Camera</h1>
+            <p data-i18n="app_desc" class="subtitle">Stream directly to your PC</p>
+        </header>
+
+        <main>
+            <div class="video-container">
+                <video id="preview" autoplay playsinline muted></video>
+                <div class="status-badge" id="status-badge">
+                    <span class="dot"></span>
+                    <span id="status-text" data-i18n="status_disconnected">Disconnected</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="input-group">
+                    <label for="camera-select" data-i18n="label_camera">Select Camera:</label>
+                    <select id="camera-select" disabled>
+                        <option value="" data-i18n="option_loading">Loading cameras...</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="resolution-select" data-i18n="label_resolution">Resolution:</label>
+                    <select id="resolution-select">
+                        <option value="max" data-i18n="res_max">Max Available</option>
+                        <option value="1080">1920x1080 (FHD)</option>
+                        <option value="720">1280x720 (HD)</option>
+                    </select>
+                </div>
+
+                <button id="start-btn" class="primary-btn pulse" onclick="toggleStream()" disabled>
+                    <span data-i18n="btn_start">Start Streaming</span>
+                </button>
+            </div>
+        </main>
+        
+        <footer>
+            <p data-i18n="footer_text">Ensure you have OBS Virtual Camera installed on your PC.</p>
+        </footer>
+    </div>
+    
+    <script src="/static/app.js"></script>
+</body>
+</html>
