@@ -54,9 +54,9 @@ async function getCameras() {
             btn.className = 'pill-btn';
             
             if (isFront) {
-                btn.textContent = currentLang === 'pl' ? `📷 Przód 1` : `📷 Front 1`;
+                btn.textContent = currentLang === 'pl' ? `Przód 1` : `Front 1`;
             } else {
-                btn.textContent = currentLang === 'pl' ? `📷 Tył ${backCount}` : `📷 Back ${backCount}`;
+                btn.textContent = currentLang === 'pl' ? `Tył ${backCount}` : `Back ${backCount}`;
                 backCount++;
             }
 
