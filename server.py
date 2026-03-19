@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import ssl
-import cv2
+
 import numpy as np
 
 from fastapi import FastAPI, Request, Body
@@ -105,4 +105,4 @@ if __name__ == "__main__":
     print(f"📱 Open this URL on your phone: https://{local_ip}:8000")
     print("=" * 60 + "\n")
     
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, ssl_keyfile="key.pem", ssl_certfile="cert.pem")
+    uvicorn.run(app, host="0.0.0.0", port=8000, ssl_keyfile="key.pem", ssl_certfile="cert.pem")
