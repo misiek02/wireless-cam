@@ -1,0 +1,14 @@
+# Python environment
+venv/
+__pycache__/
+*.pyc
+.env
+
+# SSL Certs
+*.pem
+*.crt
+*.key
+
+# IDE
+.vscode/
+.idea/
