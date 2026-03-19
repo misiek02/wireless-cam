@@ -225,3 +225,44 @@ footer {
     font-size: 0.8rem;
     margin-top: 10px;
 }
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    border: 1px solid var(--glass-border);
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+body.screen-light-active {
+    background: #ffffff !important;
+    animation: none !important;
+}
+
+body.screen-light-active .glass-container {
+    background: #ffffff !important;
+    border: 1px solid #ccc !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+body.screen-light-active h1,
+body.screen-light-active label,
+body.screen-light-active .subtitle,
+body.screen-light-active footer,
+body.screen-light-active .secondary-btn {
+    color: #000000 !important;
+    -webkit-text-fill-color: initial !important;
+    background: none !important;
+}
+
+body.screen-light-active .secondary-btn {
+    border-color: #000;
+}

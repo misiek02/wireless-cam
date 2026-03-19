@@ -16,6 +16,7 @@ const translations = {
         err_no_cam: "Camera access denied or no cameras found.",
         cam_front: "Front",
         cam_back: "Back",
+        btn_light: "💡 Screen Light",
     },
     pl: {
         app_title: "Bezprzewodowa Kamera",
@@ -33,6 +34,7 @@ const translations = {
         err_no_cam: "Odmowa dostępu do kamery lub brak kamer.",
         cam_front: "Przód",
         cam_back: "Tył",
+        btn_light: "💡 Doświetlenie Twarzy",
     }
 };
 
@@ -263,3 +265,25 @@ async function toggleStream() {
 // Init
 setLanguage('en');
 getCameras();
+
+let isLightOn = false;
+let wakeLock = null;
+
+async function toggleLight() {
+    isLightOn = !isLightOn;
+    document.body.classList.toggle('screen-light-active', isLightOn);
+    
+    if (isLightOn) {
+        try {
+            if ('wakeLock' in navigator) {
+                wakeLock = await navigator.wakeLock.request('screen');
+            }
+        } catch (err) {
+            console.error('Wake Lock error:', err);
+        }
+    } else {
+        if (wakeLock) {
+            wakeLock.release().then(() => { wakeLock = null; });
+        }
+    }
+}
