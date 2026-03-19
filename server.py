@@ -2,6 +2,7 @@ import asyncio
 import io
 import logging
 import ssl
+import cv2
 import numpy as np
 from PIL import Image
 
@@ -20,6 +21,7 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 virtual_cam = None
+window_name = "Wireless Camera Preview (OBS)"
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
@@ -31,6 +33,9 @@ async def websocket_endpoint(websocket: WebSocket):
     global virtual_cam
     await websocket.accept()
     logger.info("📱 Phone connected via WebSocket! Receiving raw MJPEG frames...")
+    
+    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(window_name, 1280, 720)
     
     try:
         while True:
@@ -57,8 +62,14 @@ async def websocket_endpoint(websocket: WebSocket):
             # Pchanie do OBS bez opóźnień
             virtual_cam.send(frame)
             
+            # Native PC Preview Window
+            bgr_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            cv2.imshow(window_name, bgr_frame)
+            cv2.waitKey(1)
+            
     except Exception as e:
         logger.info(f"📱 Phone disconnected: {e}")
+        cv2.destroyAllWindows()
 
 @app.on_event("shutdown")
 async def on_shutdown():
