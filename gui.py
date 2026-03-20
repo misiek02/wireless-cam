@@ -28,18 +28,32 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Wireless Camera")
-        self.root.geometry("300x150")
+        self.root.geometry("320x360")
         self.root.configure(bg="#0a0a0c")
         
         self.server_process = None
+        url = f"https://{get_ip()}:8000"
         
-        self.lbl_ip = tk.Label(root, text=f"https://{get_ip()}:8000", font=("Arial", 16, "bold"), bg="#0a0a0c", fg="#ffffff")
-        self.lbl_ip.pack(pady=25)
+        self.lbl_ip = tk.Label(root, text=url, font=("Arial", 16, "bold"), bg="#0a0a0c", fg="#ffffff")
+        self.lbl_ip.pack(pady=15)
+        
+        try:
+            import qrcode
+            from PIL import ImageTk
+            qr = qrcode.QRCode(version=1, box_size=5, border=1)
+            qr.add_data(url)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="white", back_color="#0a0a0c")
+            self.qr_photo = ImageTk.PhotoImage(img)
+            self.lbl_qr = tk.Label(root, image=self.qr_photo, bg="#0a0a0c")
+            self.lbl_qr.pack(pady=5)
+        except Exception as e:
+            pass
         
         self.btn_toggle = tk.Button(root, text="START", font=("Arial", 12, "bold"), bg="#1e1e1e", fg="white", 
                                     activebackground="#2a2a2c", activeforeground="white",
                                     command=self.toggle_server, width=12, relief="solid", bd=1)
-        self.btn_toggle.pack(pady=5)
+        self.btn_toggle.pack(pady=15)
         
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 

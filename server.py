@@ -97,10 +97,20 @@ async def on_shutdown():
 
 def start_server():
     local_ip = generate_self_signed_cert()
+    url = f"https://{local_ip}:8000"
     print("\n" + "=" * 60)
     print(f"✅ SERVER IS READY (RAW MJPEG WEBSOCKET MODE)!")
-    print(f"📱 Open this URL on your phone: https://{local_ip}:8000")
+    print(f"📱 Open this URL on your phone: {url}")
     print("=" * 60 + "\n")
+    
+    try:
+        import qrcode
+        qr = qrcode.QRCode()
+        qr.add_data(url)
+        qr.print_ascii()
+    except Exception as e:
+        print("Could not print QR code:", e)
+        
     uvicorn.run(app, host="0.0.0.0", port=8000, ssl_keyfile="key.pem", ssl_certfile="cert.pem")
 
 if __name__ == "__main__":
