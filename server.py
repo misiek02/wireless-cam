@@ -104,6 +104,12 @@ def start_server():
     print("=" * 60 + "\n")
     
     try:
+        from adb_handler import start_adb_reverse
+        start_adb_reverse(8000)
+    except Exception as e:
+        print("ADB skipping:", e)
+        
+    try:
         import qrcode
         qr = qrcode.QRCode()
         qr.add_data(url)

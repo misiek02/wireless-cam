@@ -234,13 +234,42 @@ video {
     right: 0;
     transform: translateY(-50%);
     aspect-ratio: 16/9;
-    border-top: 1px solid rgba(255, 255, 255, 0.4);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    border-top: 3px solid rgba(255, 255, 255, 0.9);
+    border-bottom: 3px solid rgba(255, 255, 255, 0.9);
+    /* Subtle highlight on the selected area */
+    background: rgba(255, 255, 255, 0.08);
     pointer-events: none;
     z-index: 5;
     transition: opacity 0.3s;
     opacity: 0;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
 }
+
 .crop-guide.visible {
     opacity: 1;
+}
+
+/* TOUCH HINT AREA (where you can grab to pan) */
+.video-container::after {
+    content: '↔ DRAG TO ADJUST CROP ↔';
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(5px);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.5s;
+    z-index: 20;
+}
+
+.crop-guide.visible ~ ::after {
+    /* Showing hint when crop mode active */
+    opacity: 0.4;
 }

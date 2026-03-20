@@ -35,7 +35,9 @@ class App:
         url = f"https://{get_ip()}:8000"
         
         self.lbl_ip = tk.Label(root, text=url, font=("Arial", 16, "bold"), bg="#0a0a0c", fg="#ffffff")
-        self.lbl_ip.pack(pady=15)
+        self.lbl_ip.pack(pady=10)
+        self.lbl_usb = tk.Label(root, text="USB: https://localhost:8000", font=("Arial", 10, "bold"), bg="#0a0a0c", fg="#4CAF50")
+        self.lbl_usb.pack(pady=0)
         
         try:
             import qrcode

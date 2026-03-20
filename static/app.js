@@ -10,6 +10,7 @@ let isStreaming = false;
 let activeDeviceId = null;
 let activeDeviceBtn = null;
 let isCropMode = false;
+let cropYOffset = 0.5; // Offset for vertical cropping (0 = top, 1 = bottom)
 
 let canvas = document.createElement('canvas');
 let ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -26,6 +27,36 @@ function toggleCrop() {
         guide.classList.remove('visible');
     }
 }
+
+// TOUCH PANNING LOGIC
+let startY = 0;
+let initialYOffset = 0.5;
+
+document.querySelector('.video-container').addEventListener('touchstart', (e) => {
+    if (!isCropMode) return;
+    startY = e.touches[0].clientY;
+    initialYOffset = cropYOffset;
+}, { passive: true });
+
+document.querySelector('.video-container').addEventListener('touchmove', (e) => {
+    if (!isCropMode) return;
+    const deltaY = e.touches[0].clientY - startY;
+    const screenHeight = window.innerHeight;
+    
+    // Smoothly update offset (1.0 sensitivity)
+    // finger UP (deltaY < 0) -> offset decreases -> sensor shifts to TOP
+    let newOffset = initialYOffset + (deltaY / screenHeight);
+    
+    // Clamp between 0 and 1
+    newOffset = Math.max(0, Math.min(1, newOffset));
+    cropYOffset = newOffset;
+    
+    // Update guide visually
+    const guide = document.getElementById('crop-guide');
+    const val = cropYOffset * 100; // 0% top, 100% bottom
+    guide.style.top = `${val}%`;
+    guide.style.transform = `translateY(-${val}%)`;
+}, { passive: true });
 
 function updateUI() {
     statusText.textContent = isStreaming ? "Streaming" : "Ready";
@@ -128,7 +159,15 @@ async function sendFramesLoop() {
             const drawW = vw * scale;
             const drawH = vh * scale;
             const offsetX = (canvas.width - drawW) / 2;
-            const offsetY = (canvas.height - drawH) / 2;
+            
+            // Apply vertical crop offset
+            let offsetY;
+            if (isCropMode) {
+                // If drawH > canvas.height, we have extra vertical data to choose from
+                offsetY = (canvas.height - drawH) * cropYOffset;
+            } else {
+                offsetY = (canvas.height - drawH) / 2;
+            }
             
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
